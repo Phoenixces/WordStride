@@ -9,6 +9,7 @@ WordStride is a cyberpunk English typing trainer that combines letter-based prac
 - [Practice experience](#practice-experience)
 - [Tech stack](#tech-stack)
 - [Scope](#scope)
+- [Future modes and next steps](#future-modes-and-next-steps)
 - [Design references](#design-references)
 
 ## Problem
@@ -70,7 +71,25 @@ flowchart LR
 
 - **Current:** English practice, configurable per-key goals, vocabulary feedback, sound, and local statistics.
 - **Limits:** no accounts, cross-device sync, backend, or guaranteed dictionary coverage.
-- **Future:** coding practice with language-specific snippets, punctuation, and indentation; no mode selector is currently shown.
+- **Future:** coding, clerical, and other focused practice modes; no mode selector is currently shown.
+
+## Future modes and next steps
+
+The following extensions are planned directions, not implemented features. Complete English practice before introducing another mode.
+
+| Mode | Practice material | Feedback and progress |
+| --- | --- | --- |
+| English — available | Words grouped by starting letter | Meanings, examples, WPM, accuracy, and per-letter targets |
+| Coding — proposed | Language-specific snippets, operators, brackets, and indentation | Exact typing accuracy, recurring syntax patterns, and progress by language or topic |
+| Clerical — proposed | Synthetic names, addresses, dates, numbers, and structured records | Field accuracy, completed records, and progress by task type |
+
+- **First:** stabilize English input, timing, persistence, and statistics; verify browser behavior.
+- **Next:** define the smallest useful coding and clerical exercises, including how completion and accuracy are measured.
+- **Then:** introduce shared session infrastructure with mode-specific content and input rules; pilot one new mode at a time.
+- **Before release:** test profile migration and keep each mode’s goals, scores, and achievements independent. Add a mode selector when a second mode is usable.
+- **Later extensions:** reuse the same approach for additional practice categories once their content and learning goals are defined.
+
+See [extension design](03-architecture.md#extension-design-proposed) for the proposed boundaries and tradeoffs.
 
 ## Design references
 

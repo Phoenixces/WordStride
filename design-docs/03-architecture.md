@@ -13,6 +13,7 @@ Current design of the practice engine, data and storage, and their tradeoffs. Se
   - [Dictionary enrichment](#dictionary-enrichment)
   - [Saved progress](#saved-progress)
 - [Decisions and tradeoffs](#decisions-and-tradeoffs)
+  - [Extension design — proposed](#extension-design-proposed)
 
 ## Practice engine
 
@@ -145,4 +146,42 @@ flowchart TD
 | Browser-only profile | Immediate use without accounts or backend operations | Progress stays in one browser and can be cleared |
 | Reducer-based scoring | Explicit, testable rules independent of browser effects | Timing and persistence still need application integration |
 | Completed-session achievements | Rewards sustained performance against personal targets | An abandoned session cannot earn a checkmark or best WPM |
-| Defer coding mode | Keeps the current engine focused on English behavior | Future snippets need new input, whitespace, and scoring rules |
+| Add modes after English is stable | Validates the core experience before expanding scope | Coding and clerical exercises need distinct input and scoring rules |
+
+<a id="extension-design-proposed"></a>
+
+### Extension design — proposed
+
+- **Problem:** the current engine assumes A–Z selection, letter input, and Space submission. Coding and clerical exercises do not fit those rules.
+- **Solution:** extract shared session timing and pause behavior; let each mode define content, accepted input, completion, scoring, and optional explanatory feedback.
+- **Status:** this is a future refactor, not an existing plugin system. English remains the only implemented mode.
+
+```mermaid
+flowchart TD
+    A[Mode selection] --> B[Mode-specific rules and content]
+    B --> C[English words and dictionary feedback]
+    B --> D[Coding snippets and syntax patterns]
+    B --> E[Clerical records and field validation]
+    C --> F[Shared session timing and pause lifecycle]
+    D --> F
+    E --> F
+    F --> G[Mode-specific results and goals]
+    G --> H[Versioned browser profile]
+```
+
+| Boundary | Proposed responsibility | Tradeoff |
+| --- | --- | --- |
+| Content | A provider per mode; licensed snippets and synthetic clerical records with reproducible generation | More datasets to maintain; no need to force every exercise into alphabet files |
+| Input | English keeps Space submission; coding accepts symbols and whitespace; clerical defines field navigation and submission | Tab and Enter can become input, so shortcuts and keyboard escape routes must be redesigned per mode |
+| Evaluation | Each mode defines exact-match rules, omissions, formatting tolerance, and completion units | WPM and scores are not automatically comparable across modes |
+| Feedback | English meanings, optional coding explanations, or clerical field corrections | Dictionary lookup remains specific to English; typing snippets does not require executing code |
+| Storage | Separate targets, best results, history, and achievements by mode and exercise category | Requires a versioned migration preserving current English progress |
+| Shared interface | Reuse timer, pause controls, sound preference, and result presentation where appropriate | A–Z keys and word-level sound triggers are not suitable for every mode |
+
+**Implementation sequence**
+
+1. Define one small exercise and its scoring rules for the next mode before designing a general framework.
+2. Introduce a mode identifier and migrate existing progress into the English section of the profile; retain current targets and achievements.
+3. Extract shared session behavior and implement the new content, input, and evaluation rules without changing English scoring.
+4. Add mode selection and category-specific statistics; keep English selected by default for existing users.
+5. Verify whitespace and field navigation, pause/resume, independent statistics, storage clearing, and migration before adding another mode.
