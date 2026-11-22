@@ -1,0 +1,188 @@
+{
+  "schemaVersion": 1,
+  "id": "english-zxcvbn-wikipedia",
+  "version": "zxcvbn-component-3-b29af10c6221",
+  "language": "en",
+  "kind": "word-list",
+  "ordering": "lexicographical-ascii",
+  "batchSize": 25,
+  "count": 29490,
+  "source": {
+    "name": "zxcvbn English Wikipedia frequency list",
+    "distribution": "Chromium ZxcvbnData component",
+    "componentVersion": "3",
+    "repository": "https://github.com/dropbox/zxcvbn",
+    "portRepository": "https://github.com/rianhunter/zxcvbn-cpp",
+    "snapshot": "third-party/zxcvbn/english_wikipedia.txt",
+    "sha256": "b29af10c62218f948eb299e0c68b176ab1c5ecdfe9813bd957bf2c434e90813e",
+    "sourceLines": 30000,
+    "license": "MIT",
+    "licensePath": "words/LICENSE-zxcvbn.txt"
+  },
+  "filters": [
+    "Trim surrounding whitespace",
+    "Lowercase",
+    "Keep ASCII a-z words of at least two letters",
+    "Remove duplicates",
+    "Sort by ASCII lexicographical order"
+  ],
+  "limitations": "A frequency corpus, not an exhaustive dictionary. Names, abbreviations, specialist terms, and uncommon entries may appear. Definitions and example sentences are not included.",
+  "files": {
+    "a": {
+      "path": "words/en/a.json",
+      "count": 2311,
+      "bytes": 33069,
+      "sha256": "080a9c4ec02b5df9649754d9e0663d8b272b128a56d3cdff329d8ce52d76e079"
+    },
+    "b": {
+      "path": "words/en/b.json",
+      "count": 1541,
+      "bytes": 21194,
+      "sha256": "55f4820744b292198a80d13a4d2817f9b08f9f49e34e653b828e1b11415749d7"
+    },
+    "c": {
+      "path": "words/en/c.json",
+      "count": 2875,
+      "bytes": 42779,
+      "sha256": "fa07cb04887e85329a32f957474c3afb392136d306445c607608a5344550c982"
+    },
+    "d": {
+      "path": "words/en/d.json",
+      "count": 1527,
+      "bytes": 22213,
+      "sha256": "13a2531348a0103accabfb14c09216b88f0e2ecd9bb7aed63e63833eccb45c3f"
+    },
+    "e": {
+      "path": "words/en/e.json",
+      "count": 1370,
+      "bytes": 20118,
+      "sha256": "d8d4d18124df6156a8f06198c9752240da957579fc7f1d0235ab2cdbdac09ae1"
+    },
+    "f": {
+      "path": "words/en/f.json",
+      "count": 1054,
+      "bytes": 14698,
+      "sha256": "f841404fdbcd67d090cc3dbcbdecc3e1e790d9ad6a0296b702266f96a11b8352"
+    },
+    "g": {
+      "path": "words/en/g.json",
+      "count": 936,
+      "bytes": 12890,
+      "sha256": "31f51c6be2fe2bef13a6d96a2d3c2a67d67abf979378db40f5d769c453cabecd"
+    },
+    "h": {
+      "path": "words/en/h.json",
+      "count": 973,
+      "bytes": 13717,
+      "sha256": "7062ff667a29c3e1732a18438bf65088edee178a6c2a368afb9d8d1c7f32516d"
+    },
+    "i": {
+      "path": "words/en/i.json",
+      "count": 1178,
+      "bytes": 18149,
+      "sha256": "5dc884268bcd681bc4e607b8569ec658b9417425e798a7d8ce4f67915d434e1e"
+    },
+    "j": {
+      "path": "words/en/j.json",
+      "count": 265,
+      "bytes": 3468,
+      "sha256": "e0f26c8631dff9880f0b9d8313f029ef9b720e3f281dca02f7c3cad15a5949e8"
+    },
+    "k": {
+      "path": "words/en/k.json",
+      "count": 544,
+      "bytes": 7233,
+      "sha256": "98c587c7bace34980d8b32cea90ffe4f2dc62de6c5bc013e949c4edec677bbcb"
+    },
+    "l": {
+      "path": "words/en/l.json",
+      "count": 981,
+      "bytes": 13257,
+      "sha256": "5232cdc7cb4dddf952c1c29bcd06ee614a89f8698bc23024c034b36cd3308d18"
+    },
+    "m": {
+      "path": "words/en/m.json",
+      "count": 1916,
+      "bytes": 27250,
+      "sha256": "3dcbe283eefb9dbe34c6fcd0a299b94fa086e2cfcf86f42511cfa4c624cc24e6"
+    },
+    "n": {
+      "path": "words/en/n.json",
+      "count": 728,
+      "bytes": 10160,
+      "sha256": "869ac9f39993e17539845462a128d8315b91e788d6253f807343b4ee076f371f"
+    },
+    "o": {
+      "path": "words/en/o.json",
+      "count": 756,
+      "bytes": 10689,
+      "sha256": "d4390896e32e358a09c47ae84fbce44ca28e2d2b9c73b1dacc8a0f47500bd32d"
+    },
+    "p": {
+      "path": "words/en/p.json",
+      "count": 2309,
+      "bytes": 33812,
+      "sha256": "fd1b029fb651b105726d9dabd4649b26688b1f17cb8650a78313f34439912e22"
+    },
+    "q": {
+      "path": "words/en/q.json",
+      "count": 144,
+      "bytes": 2015,
+      "sha256": "9c41acaaa6ed0a7f23bdacf10c41b15f8ddf63422720e51ffa32515ed493d265"
+    },
+    "r": {
+      "path": "words/en/r.json",
+      "count": 1694,
+      "bytes": 24389,
+      "sha256": "a6ceb9f50e88a2dac51dbdb2be135851bf23cf74f6600427b4366baf775168cd"
+    },
+    "s": {
+      "path": "words/en/s.json",
+      "count": 2981,
+      "bytes": 42159,
+      "sha256": "3b0fdca88e34e95d96da15a93bdba00f0c776e646ccc9eeb455aba43a0048799"
+    },
+    "t": {
+      "path": "words/en/t.json",
+      "count": 1455,
+      "bytes": 20233,
+      "sha256": "7082eca87872c9b2a94d053452741e9b59530476191337f3c4aa415407849704"
+    },
+    "u": {
+      "path": "words/en/u.json",
+      "count": 521,
+      "bytes": 7616,
+      "sha256": "38ae885906f3914dd57129a901624d106dd6ee884ce1623ff078c12f16161ebb"
+    },
+    "v": {
+      "path": "words/en/v.json",
+      "count": 569,
+      "bytes": 7765,
+      "sha256": "792a9930f083070dcb4387b35e7626fd68cf4f5773754bcc996182e3e00e3e95"
+    },
+    "w": {
+      "path": "words/en/w.json",
+      "count": 590,
+      "bytes": 8153,
+      "sha256": "86f4bb89a83c3c8d67a9fc2fcb2ede4615accafa8324f06e3ffbb07333f2e395"
+    },
+    "x": {
+      "path": "words/en/x.json",
+      "count": 28,
+      "bytes": 355,
+      "sha256": "d090a682b4a2ec550dc724e5c3500c1696b97622bb3ff18aad22a8c2c1098b5d"
+    },
+    "y": {
+      "path": "words/en/y.json",
+      "count": 131,
+      "bytes": 1660,
+      "sha256": "cd0300fc5892e06aba24ab12d492f946c6d6b84e57614ad7fc4a51a74409660b"
+    },
+    "z": {
+      "path": "words/en/z.json",
+      "count": 113,
+      "bytes": 1486,
+      "sha256": "69df22ea6eddbcce63974ecb789c8fd87e718980a2560b4f59ce4958fbe3884f"
+    }
+  }
+}
