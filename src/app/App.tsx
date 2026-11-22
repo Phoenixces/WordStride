@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useReducer, useRef, useState } from 'react';
 import { accuracy, KEYS, defaultTargets, validTargets, localDay, newSession, reducer, speed } from '@/features/practice/model/engine';
-import type { Action, Settings } from '@/features/practice/model/types';
-import { loadProfile, STORAGE_KEY } from '@/features/practice/model/profile-storage';
+import type { Action, Profile, Settings } from '@/features/practice/model/types';
+import { createProfileStore, STORAGE_KEY } from '@/features/practice/model/profile-storage';
 import { Dialog } from '@/shared/ui/Dialog';
 import { Metric } from '@/shared/ui/Metric';
 import { ReviewWord } from '@/features/vocabulary/components/ReviewWord';
@@ -17,7 +17,8 @@ import { wordByName } from '@/features/vocabulary/data/fallback-vocabulary';
 const clock = (ms: number) => `${Math.floor(ms / 60000).toString().padStart(2, '0')}:${Math.floor(ms / 1000 % 60).toString().padStart(2, '0')}`;
 const IDLE_PAUSE_MS = 5000;
 export default function App() {
-  const [state, reactDispatch] = useReducer(reducer, undefined, () => { const profile = loadProfile(); return { profile, session: newSession(profile) }; });
+  const [profileStore] = useState(createProfileStore);
+  const [state, reactDispatch] = useReducer(reducer, undefined, () => { const profile = profileStore.initialProfile; return { profile, session: newSession(profile) }; });
   const liveState = useRef(state);
   const lastTick = useRef<number | null>(null);
   const { profile, session } = state;
@@ -46,10 +47,32 @@ export default function App() {
   const profileMenu = useRef<HTMLDetailsElement>(null);
   latestProfile.current = profile;
   liveState.current = state;
+  const restoreProfile = useCallback((restored: Profile) => {
+    const action: Action = { type: 'RESTORE_PROFILE', profile: restored };
+    liveState.current = reducer(liveState.current, action);
+    latestProfile.current = restored;
+    lastTick.current = null;
+    lastInput.current = performance.now();
+    reactDispatch(action);
+    setDialog(null);
+    setDraft(restored.settings);
+    setPressed('');
+    setTargetError('');
+    setBatchStatus(restored.selectedKey ? 'loading' : 'idle');
+    setBatchRequest(request => request + 1);
+    setNotice('Saved progress changed in this browser. Your profile has been refreshed.');
+  }, []);
+  const syncProfile = useCallback(() => {
+    const result = profileStore.sync();
+    setStorageError(result.status === 'unavailable');
+    if (result.status === 'changed') { restoreProfile(result.profile); return true; }
+    return false;
+  }, [profileStore, restoreProfile]);
   // Flush active time before each input and pause, including the final Space.
   // Mirroring the pure reducer also handles several mobile input characters in
   // one event without checking sound against an outdated typed word.
   const dispatch = useCallback((action: Action) => {
+    if (syncProfile()) return;
     const now = performance.now();
     let current = liveState.current;
     const inactive = current.session.status === 'running' && now - lastInput.current >= IDLE_PAUSE_MS;
@@ -68,7 +91,7 @@ export default function App() {
     if (action.type === 'TYPE' || action.type === 'RESUME') lastInput.current = now;
     liveState.current = current;
     latestProfile.current = current.profile;
-  }, []);
+  }, [syncProfile]);
   const day = localDay();
   const selected = profile.selectedKey ? profile.keys[profile.selectedKey] : null;
   const selectedTargets = selected?.targets || defaultTargets();
@@ -85,10 +108,22 @@ export default function App() {
   const definition = session.lastWord ? definitions[session.lastWord.word] : undefined;
 
   const save = useCallback(() => {
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(latestProfile.current)); setStorageError(false); }
-    catch { setStorageError(true); }
-  }, []);
+    const result = profileStore.save(latestProfile.current);
+    setStorageError(result.status === 'unavailable');
+    if (result.status === 'changed') restoreProfile(result.profile);
+  }, [profileStore, restoreProfile]);
   useEffect(save, [save, progressBucket, session.status, profile.score, settings, profile.selectedKey, selected?.targets, selected?.mastered, selected?.history]);
+  useEffect(() => {
+    const storage = (event: StorageEvent) => {
+      if (event.storageArea === localStorage && (event.key === STORAGE_KEY || event.key === null)) syncProfile();
+    };
+    const check = () => { syncProfile(); };
+    window.addEventListener('storage', storage);
+    window.addEventListener('focus', check);
+    // Same-tab console/DevTools deletion does not reliably emit a storage event.
+    const interval = window.setInterval(check, 1000);
+    return () => { window.removeEventListener('storage', storage); window.removeEventListener('focus', check); window.clearInterval(interval); };
+  }, [syncProfile]);
   useEffect(() => {
     const controller = new AbortController();
     const current = latestProfile.current;

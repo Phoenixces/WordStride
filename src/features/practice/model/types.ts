@@ -19,6 +19,7 @@ export interface Session {
 export interface State { profile: Profile; session: Session }
 
 export type Action =
+  | { type: 'RESTORE_PROFILE'; profile: Profile }
   | { type: 'TYPE'; key: string; day: string }
   | { type: 'TICK'; delta: number; day: string }
   | { type: 'PAUSE' }

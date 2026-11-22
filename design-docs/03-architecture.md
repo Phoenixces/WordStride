@@ -132,6 +132,7 @@ flowchart TD
 - Loading validates stored fields and replaces invalid values with defaults.
 - Version 1 migration preserves settings, global statistics, and history; old sequential unlocks do not become earned checkmarks.
 - Storage failures do not block practice; clearing browser data removes saved progress. No cross-device sync exists.
+- Open tabs detect profile changes before saving, on storage/focus events, and every second. External changes replace the local profile and discard the active session; deleting the profile resets progress. Clearing only cached files does not clear localStorage.
 - **Implementation:** [profile storage](../src/features/practice/model/profile-storage.ts); saving is coordinated in the application.
 
 ## Decisions and tradeoffs

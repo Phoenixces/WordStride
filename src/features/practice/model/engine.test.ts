@@ -15,6 +15,16 @@ function tick(state: State, delta: number, day = DAY): State {
   return reducer(state, { type: 'TICK', delta, day });
 }
 describe('typing and vocabulary feedback', () => {
+  it('clears the active session and all progress when restoring an empty profile', () => {
+    const active = tick(type(start(), 'train '), 2000);
+    expect(active.profile.score).toBeGreaterThan(0);
+    const profile = defaultProfile();
+    const restored = reducer(active, { type: 'RESTORE_PROFILE', profile });
+    expect(restored).toEqual({ profile, session: newSession(profile) });
+    expect(tick(restored, 1000)).toEqual(restored);
+    expect(type(restored, 'retain ')).toEqual(restored);
+  });
+
   it('reveals a correct word only after Space and moves to the next word', () => {
     const typed = type(start(), 'train');
     expect(typed.session.lastWord).toBeNull();

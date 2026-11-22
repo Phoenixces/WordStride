@@ -49,3 +49,35 @@ export function parseProfile(raw: string | null): Profile {
 export function loadProfile(): Profile {
   try { return parseProfile(localStorage.getItem(STORAGE_KEY)); } catch { return defaultProfile(); }
 }
+
+type StorageResult = { status: 'changed'; profile: Profile } | { status: 'unchanged' | 'saved' | 'unavailable' };
+
+/** Check the last observed value before saving so an open tab cannot restore
+ * deleted progress or silently overwrite a newer profile from another tab. */
+export function createProfileStore(getStorage: () => Pick<Storage, 'getItem' | 'setItem'> = () => localStorage) {
+  let snapshot: string | null | undefined;
+  try { snapshot = getStorage().getItem(STORAGE_KEY); } catch { /* Storage may become available later. */ }
+  const initialProfile = parseProfile(snapshot ?? null);
+
+  function sync(): StorageResult {
+    try {
+      const raw = getStorage().getItem(STORAGE_KEY);
+      if (raw === snapshot) return { status: 'unchanged' };
+      snapshot = raw;
+      return { status: 'changed', profile: parseProfile(raw) };
+    } catch { return { status: 'unavailable' }; }
+  }
+
+  function save(profile: Profile): StorageResult {
+    const result = sync();
+    if (result.status !== 'unchanged') return result;
+    try {
+      const raw = JSON.stringify(profile);
+      if (raw !== snapshot) getStorage().setItem(STORAGE_KEY, raw);
+      snapshot = raw;
+      return { status: 'saved' };
+    } catch { return { status: 'unavailable' }; }
+  }
+
+  return { initialProfile, sync, save };
+}

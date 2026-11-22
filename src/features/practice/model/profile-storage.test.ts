@@ -1,8 +1,81 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defaultProfile } from './engine';
-import { loadProfile, parseProfile, STORAGE_KEY } from './profile-storage';
+import { createProfileStore, loadProfile, parseProfile, STORAGE_KEY } from './profile-storage';
 
 afterEach(() => vi.unstubAllGlobals());
+
+function storedProgress() {
+  const profile = defaultProfile();
+  profile.score = 1250;
+  profile.selectedKey = 'r';
+  profile.keys.r.mastered = true;
+  profile.keys.r.bestWpm = 70;
+  const values = new Map([[STORAGE_KEY, JSON.stringify(profile)]]);
+  const storage = { getItem: vi.fn((key: string) => values.get(key) ?? null),
+    setItem: vi.fn((key: string, value: string) => { values.set(key, value); }) };
+  return { profile, values, storage, store: createProfileStore(() => storage) };
+}
+
+describe('progress synchronization while the app is open', () => {
+  it.each(['remove', 'clear'])('does not resurrect scores after external %s, even before a storage event', operation => {
+    const { profile, values, storage, store } = storedProgress();
+    if (operation === 'remove') values.delete(STORAGE_KEY);
+    else values.clear();
+    expect(store.save(profile)).toEqual({ status: 'changed', profile: defaultProfile() });
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(values.has(STORAGE_KEY)).toBe(false);
+    expect(store.save(defaultProfile()).status).toBe('saved');
+    expect(parseProfile(values.get(STORAGE_KEY)!)).toEqual(defaultProfile());
+  });
+
+  it('adopts a newer profile instead of overwriting it from an older tab', () => {
+    const { profile, values, storage, store } = storedProgress();
+    const otherTab = createProfileStore(() => storage);
+    const newer = { ...profile, score: 2000 };
+    expect(otherTab.save(newer).status).toBe('saved');
+    storage.setItem.mockClear();
+    expect(store.save(profile)).toEqual({ status: 'changed', profile: newer });
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(parseProfile(values.get(STORAGE_KEY)!)).toEqual(newer);
+  });
+
+  it('detects a deletion on sync while idle and does not repeatedly reset', () => {
+    const { values, store } = storedProgress();
+    values.delete(STORAGE_KEY);
+    expect(store.sync()).toEqual({ status: 'changed', profile: defaultProfile() });
+    expect(store.sync().status).toBe('unchanged');
+  });
+
+  it('ignores unrelated dictionary changes and its own saves', () => {
+    const { values, storage, store } = storedProgress();
+    values.set('wordstride.dictionary.v1', '[]');
+    expect(store.sync().status).toBe('unchanged');
+    expect(store.save(store.initialProfile).status).toBe('saved');
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(store.save({ ...store.initialProfile, score: 1300 }).status).toBe('saved');
+    expect(store.sync().status).toBe('unchanged');
+  });
+
+  it('refuses to write when reading storage fails and recovers when access returns', () => {
+    const { profile, storage, store } = storedProgress();
+    storage.getItem.mockImplementationOnce(() => { throw new Error('Storage denied'); });
+    expect(store.save(profile).status).toBe('unavailable');
+    expect(storage.setItem).not.toHaveBeenCalled();
+    expect(store.save(profile).status).toBe('saved');
+    storage.setItem.mockImplementationOnce(() => { throw new Error('Quota exceeded'); });
+    expect(store.save({ ...profile, score: 1500 }).status).toBe('unavailable');
+    expect(store.save({ ...profile, score: 1500 }).status).toBe('saved');
+  });
+
+  it('loads existing progress safely when initially unavailable storage returns', () => {
+    const { profile, storage } = storedProgress();
+    storage.getItem.mockImplementationOnce(() => { throw new Error('Storage denied'); });
+    const store = createProfileStore(() => storage);
+    expect(store.initialProfile).toEqual(defaultProfile());
+    expect(store.save(defaultProfile())).toEqual({ status: 'changed', profile });
+    expect(storage.setItem).not.toHaveBeenCalled();
+  });
+});
 const result = { date: '2026-11-22', wpm: 45.5, accuracy: 98.2, correct: 65, skipped: 2 };
 describe('saved per-key progress', () => {
   it.each([null, '', '{broken', 'null', '[]', '42', '{"version":3}'])('starts safely for missing, malformed or unsupported storage: %j', raw => {

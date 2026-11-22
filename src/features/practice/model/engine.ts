@@ -43,6 +43,7 @@ function finish(state: State, day: string): State {
   };
 }
 export function reducer(state: State, action: Action): State {
+  if (action.type === 'RESTORE_PROFILE') return { profile: action.profile, session: newSession(action.profile) };
   const { session: s, profile: p } = state;
   if (action.type === 'KEY_SETTINGS') {
     if (!/^[a-z]$/.test(action.key) || !validTargets(action.targets)) return state;

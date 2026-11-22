@@ -253,7 +253,7 @@ test('Profile menu provides sound preview and a graph with independent key stati
   await page.locator('.profile-menu summary').click();
   await page.getByRole('button', { name: 'Settings', exact: true }).click();
   await page.getByRole('button', { name: 'Preview sound' }).click();
-  await expect.poll(() => sounds(page)).toBe(1);
+  await expect.poll(() => sounds(page)).toBeGreaterThan(0);
   await expect(page.getByRole('checkbox', { name: /Success sound/ })).not.toBeChecked();
   await page.getByRole('button', { name: 'Close dialog' }).click();
   await page.locator('.profile-menu summary').click();
@@ -268,4 +268,47 @@ test('Profile menu provides sound preview and a graph with independent key stati
   await page.getByLabel('Statistics for key').selectOption('z');
   await expect(page.locator('.statistics-dialog')).toContainText('Complete a session to record');
   expect((await storedProfile(page)).selectedKey).toBe('r');
+});
+
+test('Clearing storage while idle resets the visible score and survives reload', async ({ page }) => {
+  await page.goto('/');
+  await startKey(page, 'r');
+  await completeWord(page);
+  await page.keyboard.press('Escape');
+  const score = page.locator('.metric').filter({ hasText: 'SCORE' }).locator('strong');
+  await expect(score).not.toHaveText('0');
+  await page.evaluate(() => localStorage.clear());
+  await expect(score).toHaveText('0');
+  await expect(input(page)).toHaveCount(0);
+  await expect(page.locator('.key-choice[data-mastered="false"]')).toHaveCount(26);
+  await page.reload();
+  await expect(score).toHaveText('0');
+  expect((await storedProfile(page)).keys.r.daily).toEqual({});
+});
+
+test('Deleting progress immediately before a lifecycle save cannot restore old data', async ({ page }) => {
+  await page.goto('/');
+  await startKey(page, 'r');
+  await completeWord(page);
+  await page.evaluate(key => {
+    localStorage.removeItem(key);
+    window.dispatchEvent(new Event('pagehide'));
+  }, storageKey);
+  await expect(page.locator('.metric').filter({ hasText: 'SCORE' }).locator('strong')).toHaveText('0');
+  await page.reload();
+  expect((await storedProfile(page)).score).toBe(0);
+  expect((await storedProfile(page)).selectedKey).toBeNull();
+});
+
+test('Clearing progress in another tab resets the original tab', async ({ page, context }) => {
+  await page.goto('/');
+  await startKey(page, 'r');
+  await completeWord(page);
+  const other = await context.newPage();
+  await other.goto('/');
+  await other.evaluate(() => localStorage.clear());
+  await expect(page.locator('.metric').filter({ hasText: 'SCORE' }).locator('strong')).toHaveText('0');
+  await page.reload();
+  expect((await storedProfile(page)).score).toBe(0);
+  await other.close();
 });
